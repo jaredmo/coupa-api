@@ -27,17 +27,15 @@ if [[ -z "$scope" ]]; then
     exit 1
 fi
 
-# Get the OAuth2 token
-token=$(curl -s -X POST "$token_url" \
--H "Content-Type: application/x-www-form-urlencoded" \
--d "grant_type=client_credentials" \
--d "client_id=$client_id" \
--d "client_secret=$client_secret" \
--d "scope=$scope" | jq -r '.access_token')
-
 # Ensure curl is installed
 if ! command -v curl >/dev/null 2>&1; then
     echo "Error: curl is not installed" >&2
+    exit 1
+fi
+
+# Ensure jq is installed
+if ! command -v jq >/dev/null 2>&1; then
+    echo "Error: jq is not installed" >&2
     exit 1
 fi
 
@@ -52,6 +50,14 @@ if [[ ! -f "$id_file" ]]; then
     echo "Error: ID file '$id_file' not found" >&2
     exit 1
 fi
+
+# Get the OAuth2 token
+token=$(curl -s -X POST "$token_url" \
+-H "Content-Type: application/x-www-form-urlencoded" \
+-d "grant_type=client_credentials" \
+-d "client_id=$client_id" \
+-d "client_secret=$client_secret" \
+-d "scope=$scope" | jq -r '.access_token')
 
 for id in $(cat "$id_file"); do
     
